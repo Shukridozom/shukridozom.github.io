@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { marked } from 'marked';
 
-const articlesRoot = path.join(process.cwd(), 'src', 'content', 'Articles');
+const articlesRoot = path.join(process.cwd(), 'Articles');
 
 export interface Topic {
   title: string;
@@ -22,6 +22,15 @@ export interface Article extends ArticleSummary {
   html: string;
 }
 
+/** URL-safe slug from a folder title (spaces → hyphens). */
+export function toSlug(title: string): string {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function isDirectory(entryPath: string): boolean {
   return fs.statSync(entryPath).isDirectory();
 }
@@ -33,6 +42,18 @@ function readOptionalSummary(topicDir: string): string | null {
   return text.length > 0 ? text : null;
 }
 
+function findDirBySlug(parentDir: string, slug: string): string | null {
+  if (!fs.existsSync(parentDir)) return null;
+
+  const match = fs
+    .readdirSync(parentDir)
+    .map((name) => path.join(parentDir, name))
+    .filter(isDirectory)
+    .find((dir) => toSlug(path.basename(dir)) === slug);
+
+  return match ?? null;
+}
+
 export function getTopics(): Topic[] {
   if (!fs.existsSync(articlesRoot)) return [];
 
@@ -42,7 +63,7 @@ export function getTopics(): Topic[] {
     .filter(isDirectory)
     .map((topicDir) => {
       const title = path.basename(topicDir);
-      const slug = encodeURIComponent(title);
+      const slug = toSlug(title);
       const articles = fs
         .readdirSync(topicDir)
         .map((name) => path.join(topicDir, name))
@@ -52,7 +73,7 @@ export function getTopics(): Topic[] {
           const articleTitle = path.basename(articleDir);
           return {
             title: articleTitle,
-            slug: encodeURIComponent(articleTitle),
+            slug: toSlug(articleTitle),
             topicSlug: slug,
             topicTitle: title,
           };
@@ -70,19 +91,24 @@ export function getTopics(): Topic[] {
 }
 
 export function getArticle(topicSlug: string, articleSlug: string): Article | null {
-  const topicTitle = decodeURIComponent(topicSlug);
-  const articleTitle = decodeURIComponent(articleSlug);
-  const pagePath = path.join(articlesRoot, topicTitle, articleTitle, 'page.md');
+  const topicDir = findDirBySlug(articlesRoot, topicSlug);
+  if (!topicDir) return null;
 
+  const articleDir = findDirBySlug(topicDir, articleSlug);
+  if (!articleDir) return null;
+
+  const pagePath = path.join(articleDir, 'page.md');
   if (!fs.existsSync(pagePath)) return null;
 
+  const topicTitle = path.basename(topicDir);
+  const articleTitle = path.basename(articleDir);
   const markdown = fs.readFileSync(pagePath, 'utf8');
   const html = marked.parse(markdown, { async: false }) as string;
 
   return {
     title: articleTitle,
-    slug: encodeURIComponent(articleTitle),
-    topicSlug: encodeURIComponent(topicTitle),
+    slug: toSlug(articleTitle),
+    topicSlug: toSlug(topicTitle),
     topicTitle,
     html,
   };

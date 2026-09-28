@@ -36,7 +36,7 @@ Edit personal details in [`Project/src/data/site.ts`](Project/src/data/site.ts) 
 
 ## Articles
 
-Add topics and articles under `Project/src/content/Articles/` using this layout:
+Add topics and articles under `Project/Articles/` using this layout:
 
 ```text
 Articles/
