@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Nav from '../../components/Nav.astro';
+import { getTopics } from '../../lib/articles';
+
+const topics = getTopics();
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="Articles" description="Articles and notes by topic.">
+  <Nav slot="nav" />
+
+  <h1 class="page-title">Articles</h1>
+  <p class="page-lead">Browse topics and open individual articles written in Markdown.</p>
+
+  {
+    topics.length === 0 ? (
+      <p class="empty-state">No articles yet. Add topic folders under <code>src/content/Articles</code>.</p>
+    ) : (
+      <div class="topic-grid">
+        {topics.map((topic) => (
+          <article class="topic-card">
+            <h2 class="topic-title">{topic.title}</h2>
+            {topic.summary && <p class="topic-summary">{topic.summary}</p>}
+            <ul class="article-list">
+              {topic.articles.map((article) => (
+                <li>
+                  <a href={`${base}articles/${article.topicSlug}/${article.slug}/`}>
+                    {article.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .topic-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+
+  .topic-card {
+    padding: 1.35rem 1.4rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+  }
+
+  .topic-title {
+    margin: 0 0 0.55rem;
+    font-size: 1.35rem;
+  }
+
+  .topic-summary {
+    margin: 0 0 1rem;
+    color: var(--color-muted);
+    font-size: 0.98rem;
+  }
+
+  .article-list {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+
+  .article-list li + li {
+    margin-top: 0.35rem;
+  }
+</style>

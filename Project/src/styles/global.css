@@ -1,0 +1,116 @@
+:root {
+  --color-bg: #f7f4ef;
+  --color-bg-accent: #ebe4d8;
+  --color-surface: #fffdf9;
+  --color-text: #1c1915;
+  --color-muted: #5c564c;
+  --color-border: #d4ccc0;
+  --color-accent: #0f5c4c;
+  --color-accent-hover: #0a4338;
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  --font-body: "Source Sans 3", "Segoe UI", "Helvetica Neue", sans-serif;
+  --max-width: 68rem;
+  --nav-height: 4rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--color-text);
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, #dce8e4 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, #e8dfd0 0%, transparent 50%),
+    var(--color-bg);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+.container {
+  width: min(100% - 2rem, var(--max-width));
+  margin-inline: auto;
+}
+
+.site-main {
+  padding-block: 2.5rem 4rem;
+}
+
+.page-title {
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  margin: 0 0 0.75rem;
+}
+
+.page-lead {
+  color: var(--color-muted);
+  max-width: 40rem;
+  margin-bottom: 2rem;
+}
+
+.prose {
+  max-width: 42rem;
+}
+
+.prose :where(h1, h2, h3) {
+  margin-top: 1.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.prose :where(ul, ol) {
+  padding-left: 1.25rem;
+}
+
+.prose :where(pre) {
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: #1c1915;
+  color: #f7f4ef;
+}
+
+.prose :where(code) {
+  font-size: 0.92em;
+}
+
+.empty-state {
+  padding: 2.5rem 0;
+  color: var(--color-muted);
+}
