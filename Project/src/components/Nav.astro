@@ -1,0 +1,87 @@
+---
+import { site } from '../data/site';
+
+const base = import.meta.env.BASE_URL;
+const pathname = Astro.url.pathname;
+
+const links = [
+  { href: base, label: 'Home', match: (p: string) => p === base || p === `${base}index.html` },
+  { href: `${base}articles/`, label: 'Articles', match: (p: string) => p.includes('/articles') },
+  { href: `${base}projects/`, label: 'Projects', match: (p: string) => p.includes('/projects') },
+  { href: `${base}contact/`, label: 'Contact Me', match: (p: string) => p.includes('/contact') },
+];
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href={base}>{site.name}</a>
+    <nav class="site-nav" aria-label="Main">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class:list={['nav-link', { active: link.match(pathname) }]}
+            aria-current={link.match(pathname) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: var(--nav-height);
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .brand:hover {
+    color: var(--color-accent);
+  }
+
+  .site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.1rem;
+    justify-content: flex-end;
+  }
+
+  .nav-link {
+    color: var(--color-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--color-accent);
+  }
+
+  .nav-link.active {
+    text-decoration: underline;
+    text-underline-offset: 0.28em;
+  }
+</style>

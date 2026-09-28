@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Nav from '../../../components/Nav.astro';
+import { getAllArticles, getArticle } from '../../../lib/articles';
+
+export function getStaticPaths() {
+  return getAllArticles().map((article) => ({
+    params: {
+      topic: article.topicSlug,
+      article: article.slug,
+    },
+  }));
+}
+
+const { topic, article: articleParam } = Astro.params;
+const article = getArticle(topic!, articleParam!);
+
+if (!article) {
+  throw new Error(`Article not found: ${topic}/${articleParam}`);
+}
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={article.title} description={`${article.title} — ${article.topicTitle}`}>
+  <Nav slot="nav" />
+
+  <p class="crumb">
+    <a href={`${base}articles/`}>Articles</a>
+    <span aria-hidden="true"> / </span>
+    <span>{article.topicTitle}</span>
+  </p>
+
+  <article class="prose" set:html={article.html} />
+</BaseLayout>
+
+<style>
+  .crumb {
+    margin: 0 0 1.25rem;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+  }
+</style>

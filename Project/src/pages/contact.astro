@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import { site } from '../data/site';
+
+const whatsappHref = `https://wa.me/${site.whatsapp}`;
+---
+
+<BaseLayout title="Contact Me" description={`Contact ${site.name}`}>
+  <Nav slot="nav" />
+
+  <h1 class="page-title">Contact Me</h1>
+  <p class="page-lead">Reach out using any of the channels below.</p>
+
+  <ul class="contact-list">
+    <li class="contact-item">
+      <span class="label">Phone</span>
+      <div class="value-row">
+        <a href={`tel:${site.phone.replace(/\s+/g, '')}`}>{site.phone}</a>
+        <a class="whatsapp" href={whatsappHref} target="_blank" rel="noopener noreferrer" aria-label="Message on WhatsApp">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 1.82c2.17 0 4.2.84 5.73 2.37a8.07 8.07 0 0 1 2.37 5.72c0 4.46-3.63 8.09-8.1 8.09-1.41 0-2.79-.36-4.01-1.05l-.29-.17-3.12.82.83-3.04-.18-.31a8.05 8.05 0 0 1-1.07-4.04c0-4.46 3.63-8.09 8.09-8.09zm4.52 10.34c-.17-.09-1.03-.51-1.19-.57-.16-.06-.28-.09-.4.09-.11.17-.45.57-.55.68-.1.12-.2.13-.37.04-.17-.09-.73-.27-1.39-.86-.51-.46-.86-.1.02-1.12-.31-.31-.63-.63-.72-.77-.09-.14-.01-.24.08-.33.08-.08.17-.2.26-.3.09-.1.11-.17.17-.28.06-.12.03-.21 0-.3-.04-.09-.4-1-0.55-1.37-.14-.34-.29-.3-.4-.3h-.34c-.12 0-.3.04-.46.21-.16.17-.6.59-.6 1.43s.62 1.66.7 1.77c.09.12 1.21 1.85 2.93 2.59 1.72.74 1.72.49 2.03.46.31-.03 1.03-.42 1.18-.83.14-.41.14-.76.1-.83-.04-.07-.16-.12-.33-.21z"
+            />
+          </svg>
+        </a>
+      </div>
+    </li>
+    <li class="contact-item">
+      <span class="label">Email</span>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+    </li>
+    <li class="contact-item">
+      <span class="label">LinkedIn</span>
+      <a href={site.linkedin} target="_blank" rel="noopener noreferrer">{site.linkedin}</a>
+    </li>
+  </ul>
+</BaseLayout>
+
+<style>
+  .contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+    max-width: 36rem;
+  }
+
+  .contact-item {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem 1.15rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+  }
+
+  .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .value-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .whatsapp {
+    display: inline-flex;
+    color: #128c7e;
+    text-decoration: none;
+  }
+
+  .whatsapp:hover {
+    color: #075e54;
+  }
+</style>
