@@ -22,7 +22,7 @@ My experience includes:
 
 I am particularly interested in improving the software engineering practices used in embedded systems—bringing concepts such as modularity, automated testing, package management, and continuous integration into resource-constrained, real-time environments.
 `,
-  photo: 'Shukridozom.jpeg',
+  photo: 'Shukridozom.jpg',
   phone: '+971 58 988 4169',
   /** Digits only, with country code, for the WhatsApp link. */
   whatsapp: '971589884169',
