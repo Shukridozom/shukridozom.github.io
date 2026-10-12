@@ -1,0 +1,99 @@
+---
+---
+
+<div class="theme-toggle" data-theme-toggle>
+  <button
+    type="button"
+    class="theme-btn"
+    aria-label="Theme: auto. Click to change."
+    title="Theme"
+    data-theme-btn
+  >
+    <span class="theme-icon theme-icon-light" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+      </svg>
+    </span>
+    <span class="theme-icon theme-icon-dark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3a7 7 0 0 0 11.5 11.5z"></path>
+      </svg>
+    </span>
+    <span class="theme-icon theme-icon-auto" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="14" rx="2"></rect>
+        <path d="M8 20h8M12 18v2"></path>
+      </svg>
+    </span>
+  </button>
+</div>
+
+<script>
+  type ThemePref = 'light' | 'dark' | 'auto';
+  const order: ThemePref[] = ['light', 'dark', 'auto'];
+
+  const getPref = (): ThemePref => {
+    const value = localStorage.getItem('theme');
+    return value === 'light' || value === 'dark' || value === 'auto' ? value : 'auto';
+  };
+
+  const applyTheme = (pref: ThemePref) => {
+    document.documentElement.dataset.theme = pref;
+    localStorage.setItem('theme', pref);
+
+    document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+      if (!(btn instanceof HTMLButtonElement)) return;
+      btn.dataset.theme = pref;
+      btn.setAttribute('aria-label', `Theme: ${pref}. Click to change.`);
+      btn.title = `Theme: ${pref}`;
+    });
+  };
+
+  const bind = () => {
+    document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+      if (!(btn instanceof HTMLButtonElement) || btn.dataset.bound === 'true') return;
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', () => {
+        const current = getPref();
+        const next = order[(order.indexOf(current) + 1) % order.length];
+        applyTheme(next);
+      });
+    });
+    applyTheme(getPref());
+  };
+
+  bind();
+  document.addEventListener('astro:page-load', bind);
+</script>
+
+<style>
+  .theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .theme-btn:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
+    color: var(--color-accent);
+  }
+
+  .theme-icon {
+    display: none;
+  }
+
+  .theme-btn[data-theme='light'] .theme-icon-light,
+  .theme-btn[data-theme='dark'] .theme-icon-dark,
+  .theme-btn[data-theme='auto'] .theme-icon-auto {
+    display: inline-flex;
+  }
+</style>

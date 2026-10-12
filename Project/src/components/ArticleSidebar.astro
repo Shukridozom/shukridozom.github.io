@@ -49,12 +49,16 @@ const base = import.meta.env.BASE_URL;
 </aside>
 
 <script>
-  const root = document.querySelector('[data-article-sidebar]');
-  const shell = document.querySelector('[data-article-shell]');
-  const backdrop = document.querySelector('[data-sidebar-backdrop]');
-  const toggle = root?.querySelector('[data-sidebar-toggle]');
+  const bindSidebar = () => {
+    const root = document.querySelector('[data-article-sidebar]');
+    const shell = document.querySelector('[data-article-shell]');
+    const backdrop = document.querySelector('[data-sidebar-backdrop]');
+    const toggle = root?.querySelector('[data-sidebar-toggle]');
 
-  if (root && shell && toggle instanceof HTMLButtonElement) {
+    if (!root || !shell || !(toggle instanceof HTMLButtonElement)) return;
+    if (toggle.dataset.bound === 'true') return;
+    toggle.dataset.bound = 'true';
+
     const mq = window.matchMedia('(max-width: 819px)');
 
     const setOpen = (open: boolean) => {
@@ -82,7 +86,10 @@ const base = import.meta.env.BASE_URL;
     mq.addEventListener('change', (event) => {
       setOpen(!event.matches);
     });
-  }
+  };
+
+  bindSidebar();
+  document.addEventListener('astro:page-load', bindSidebar);
 </script>
 
 <style>
@@ -93,6 +100,9 @@ const base = import.meta.env.BASE_URL;
     height: 100%;
     background: var(--color-surface);
     border-right: 1px solid var(--color-border);
+    transition:
+      background-color var(--motion),
+      border-color var(--motion);
   }
 
   .sidebar-header {
@@ -154,13 +164,16 @@ const base = import.meta.env.BASE_URL;
 
   .article-nav a {
     display: block;
-    padding: 0.55rem 0.65rem;
-    border-radius: 0.4rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.5rem;
     color: var(--color-muted);
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     line-height: 1.35;
+    transition:
+      color var(--motion),
+      background-color var(--motion);
   }
 
   .article-nav a:hover,
@@ -168,4 +181,36 @@ const base = import.meta.env.BASE_URL;
     color: var(--color-accent);
     background: color-mix(in srgb, var(--color-accent) 10%, transparent);
   }
+
+  .article-nav a.active {
+    text-decoration: underline;
+    text-underline-offset: 0.28em;
+  }
+
+  @media (max-width: 819px) {
+    .article-sidebar,
+    .article-sidebar.is-collapsed {
+      height: 100%;
+      max-height: 100%;
+      border: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    /* Panel visibility is handled by the parent; always show list content on mobile. */
+    .article-sidebar.is-collapsed .topic-link,
+    .article-sidebar.is-collapsed .article-nav {
+      display: block;
+    }
+
+    .article-sidebar.is-collapsed .sidebar-header {
+      justify-content: space-between;
+      padding: 1.1rem 1rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+  }
 </style>
+
+

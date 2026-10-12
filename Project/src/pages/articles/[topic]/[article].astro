@@ -21,7 +21,6 @@ if (!article || !topicData) {
   throw new Error(`Article not found: ${topic}/${articleParam}`);
 }
 
-const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout
@@ -55,27 +54,27 @@ const base = import.meta.env.BASE_URL;
     </div>
 
     <div class="article-content">
-      <p class="crumb">
-        <a href={`${base}articles/`}>Articles</a>
-        <span aria-hidden="true"> / </span>
-        <a href={`${base}articles/${article.topicSlug}/`}>{article.topicTitle}</a>
-      </p>
-
       <article class="prose article-body" set:html={article.html} />
     </div>
   </div>
 </BaseLayout>
 
 <script>
-  const shell = document.querySelector('[data-article-shell]');
-  const openBtn = document.querySelector('[data-mobile-sidebar-open]');
-  const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+  const bindMobileOpen = () => {
+    const openBtn = document.querySelector('[data-mobile-sidebar-open]');
+    const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
 
-  if (shell && openBtn instanceof HTMLButtonElement && sidebarToggle instanceof HTMLButtonElement) {
+    if (!(openBtn instanceof HTMLButtonElement) || !(sidebarToggle instanceof HTMLButtonElement)) return;
+    if (openBtn.dataset.bound === 'true') return;
+    openBtn.dataset.bound = 'true';
+
     openBtn.addEventListener('click', () => {
       sidebarToggle.click();
     });
-  }
+  };
+
+  bindMobileOpen();
+  document.addEventListener('astro:page-load', bindMobileOpen);
 </script>
 
 <style>
@@ -85,7 +84,7 @@ const base = import.meta.env.BASE_URL;
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
     min-height: calc(100vh - var(--nav-height));
-    transition: grid-template-columns 0.2s ease;
+    transition: grid-template-columns var(--motion);
   }
 
   .article-shell.sidebar-collapsed {
@@ -114,20 +113,6 @@ const base = import.meta.env.BASE_URL;
     padding: 2rem clamp(1rem, 3vw, 2.5rem) 3.5rem;
   }
 
-  .crumb {
-    margin: 0 0 1.25rem;
-    color: var(--color-muted);
-    font-size: 0.95rem;
-  }
-
-  .crumb a {
-    text-decoration: none;
-  }
-
-  .crumb a:hover {
-    text-decoration: underline;
-  }
-
   .article-body {
     max-width: 46rem;
   }
@@ -152,17 +137,18 @@ const base = import.meta.env.BASE_URL;
     }
 
     .article-shell.sidebar-open .mobile-sidebar-open {
-      display: none;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .sidebar-backdrop {
       display: block;
       position: fixed;
       inset: var(--nav-height) 0 0;
-      background: rgb(28 25 21 / 35%);
+      background: var(--color-overlay);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity var(--motion);
       z-index: 6;
     }
 
@@ -171,21 +157,32 @@ const base = import.meta.env.BASE_URL;
       pointer-events: auto;
     }
 
+    /* Match main navbar mobile menu: full-width card under the header. */
     .sidebar-column {
       position: fixed;
-      top: var(--nav-height);
-      left: 0;
-      bottom: 0;
-      width: min(20rem, 86vw);
+      top: calc(var(--nav-height) + 0.65rem);
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      width: auto;
       height: auto;
       z-index: 7;
-      transform: translateX(-105%);
-      transition: transform 0.2s ease;
-      box-shadow: 8px 0 28px rgb(28 25 21 / 12%);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition:
+        opacity var(--motion),
+        transform var(--motion),
+        visibility var(--motion);
+      box-shadow: none;
     }
 
     .article-shell.sidebar-open .sidebar-column {
-      transform: translateX(0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
     }
 
     .article-content {
@@ -193,3 +190,4 @@ const base = import.meta.env.BASE_URL;
     }
   }
 </style>
+

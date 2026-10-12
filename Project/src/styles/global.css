@@ -1,4 +1,5 @@
-:root {
+:root,
+html[data-theme='light'] {
   --color-bg: #f6f7f8;
   --color-bg-accent: #e8ecef;
   --color-surface: #ffffff;
@@ -7,6 +8,58 @@
   --color-border: #e2e6ea;
   --color-accent: #0f5c4c;
   --color-accent-hover: #0a4338;
+  --color-overlay: rgb(26 29 33 / 35%);
+  --shadow-soft: 0 8px 20px rgb(26 29 33 / 6%);
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  --color-bg: #121417;
+  --color-bg-accent: #1a1e24;
+  --color-surface: #1c2128;
+  --color-text: #e8eaed;
+  --color-muted: #9aa3ad;
+  --color-border: #2c333c;
+  --color-accent: #3dba9f;
+  --color-accent-hover: #62d0b8;
+  --color-overlay: rgb(0 0 0 / 55%);
+  --shadow-soft: 0 8px 20px rgb(0 0 0 / 25%);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] {
+    --color-bg: #121417;
+    --color-bg-accent: #1a1e24;
+    --color-surface: #1c2128;
+    --color-text: #e8eaed;
+    --color-muted: #9aa3ad;
+    --color-border: #2c333c;
+    --color-accent: #3dba9f;
+    --color-accent-hover: #62d0b8;
+    --color-overlay: rgb(0 0 0 / 55%);
+    --shadow-soft: 0 8px 20px rgb(0 0 0 / 25%);
+    color-scheme: dark;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  html[data-theme='auto'] {
+    --color-bg: #f6f7f8;
+    --color-bg-accent: #e8ecef;
+    --color-surface: #ffffff;
+    --color-text: #1a1d21;
+    --color-muted: #5b6470;
+    --color-border: #e2e6ea;
+    --color-accent: #0f5c4c;
+    --color-accent-hover: #0a4338;
+    --color-overlay: rgb(26 29 33 / 35%);
+    --shadow-soft: 0 8px 20px rgb(26 29 33 / 6%);
+    color-scheme: light;
+  }
+}
+
+:root {
   --font-display: "Outfit", "Segoe UI", "Helvetica Neue", sans-serif;
   --font-body: "Outfit", "Segoe UI", "Helvetica Neue", sans-serif;
   --radius-sm: 0.5rem;
@@ -14,6 +67,7 @@
   --radius-lg: 1rem;
   --max-width: 68rem;
   --nav-height: 4rem;
+  --motion: 0.22s ease;
 }
 
 /* Shared hamburger / close icon button (site nav + article sidebar). */
@@ -29,6 +83,10 @@
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   cursor: pointer;
+  transition:
+    background-color var(--motion),
+    border-color var(--motion),
+    color var(--motion);
 }
 
 .icon-toggle-bar {
@@ -37,7 +95,7 @@
   height: 2px;
   background: var(--color-text);
   border-radius: 999px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform var(--motion), opacity var(--motion), background-color var(--motion);
 }
 
 .icon-toggle.is-open .icon-toggle-bar:nth-child(1) {
@@ -72,6 +130,9 @@ body {
   color: var(--color-text);
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
+  transition:
+    background-color var(--motion),
+    color var(--motion);
 }
 
 img {
@@ -84,6 +145,7 @@ a {
   color: var(--color-accent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
+  transition: color var(--motion);
 }
 
 a:hover {
@@ -108,7 +170,6 @@ p {
   margin-inline: auto;
 }
 
-/* Shared hamburger / close icon button (site nav + article sidebar) */
 .site-main {
   padding-block: 2.5rem 4rem;
 }
@@ -172,4 +233,34 @@ body.sidebar-drawer-open {
 .empty-state {
   padding: 2.5rem 0;
   color: var(--color-muted);
+}
+
+/* Soft page enter animation (View Transitions + first paint). */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.site-main {
+  animation: page-enter 0.28s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }
