@@ -15,7 +15,20 @@ const links = [
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href={base}>{site.name}</a>
-    <nav class="site-nav" aria-label="Main">
+
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      aria-label="Open menu"
+    >
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="Main">
       {
         links.map((link) => (
           <a
@@ -31,13 +44,39 @@ const links = [
   </div>
 </header>
 
+<script>
+  const header = document.querySelector('.site-header');
+  const toggle = document.querySelector('.nav-toggle');
+  const nav = document.querySelector('#site-nav');
+
+  if (header && toggle instanceof HTMLButtonElement && nav) {
+    const setOpen = (open: boolean) => {
+      header.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(!header.classList.contains('is-open'));
+    });
+
+    nav.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => setOpen(false));
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  }
+</script>
+
 <style>
   .site-header {
     position: sticky;
     top: 0;
     z-index: 10;
     backdrop-filter: blur(10px);
-    background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
     border-bottom: 1px solid var(--color-border);
   }
 
@@ -47,6 +86,7 @@ const links = [
     justify-content: space-between;
     gap: 1rem;
     min-height: var(--nav-height);
+    position: relative;
   }
 
   .brand {
@@ -55,33 +95,115 @@ const links = [
     font-weight: 600;
     color: var(--color-text);
     text-decoration: none;
+    white-space: nowrap;
+    min-width: 0;
   }
 
   .brand:hover {
     color: var(--color-accent);
   }
 
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.55rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.45rem;
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+
+  .nav-toggle-bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 1px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .site-header.is-open .nav-toggle-bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .site-header.is-open .nav-toggle-bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  .site-header.is-open .nav-toggle-bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
   .site-nav {
+    display: none;
+    flex-direction: column;
+    gap: 0.15rem;
+    position: absolute;
+    top: calc(100% + 0.65rem);
+    left: 0;
+    right: 0;
+    padding: 0.65rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 12px 28px rgb(28 25 21 / 10%);
+  }
+
+  .site-header.is-open .site-nav {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem 1.1rem;
-    justify-content: flex-end;
   }
 
   .nav-link {
     color: var(--color-muted);
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.5rem;
   }
 
   .nav-link:hover,
   .nav-link.active {
     color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
   }
 
   .nav-link.active {
     text-decoration: underline;
     text-underline-offset: 0.28em;
+  }
+
+  @media (min-width: 720px) {
+    .nav-toggle {
+      display: none;
+    }
+
+    .site-nav {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.35rem 1.1rem;
+      position: static;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .nav-link {
+      padding: 0;
+      font-size: 0.95rem;
+      border-radius: 0;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: transparent;
+    }
   }
 </style>
