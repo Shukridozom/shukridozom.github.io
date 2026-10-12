@@ -53,6 +53,7 @@ Update `site` in [`Project/astro.config.mjs`](Project/astro.config.mjs) to match
    - `whatsapp` — digits only, with country code (no `+` or spaces), used for the WhatsApp link
    - `email` — mailto link on Contact
    - `linkedin` — full LinkedIn profile URL
+   - `github` — full GitHub profile URL
 3. Preview on `/contact`, then push to `main` to publish.
 
 ### Articles (where to add them)
@@ -87,9 +88,9 @@ Project/Articles/
 
 Number articles in the **folder name**, for example:
 
-- `1. Sharing System Objects Across Project Files`
-- `2. Encapsulating Nested Objects…`
-- `11. Something Else`
+- `1. Article 1`
+- `2. Article 2`
+- `11. Article 11`
 
 The site sorts by that leading number, so you get `1, 2, 11` (not `1, 11, 2`). No extra `order.txt` file is needed.
 
