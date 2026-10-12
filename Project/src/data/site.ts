@@ -28,4 +28,5 @@ I am particularly interested in improving the software engineering practices use
   whatsapp: '971589884169',
   email: 'Shukridozom@hotmail.com',
   linkedin: 'https://www.linkedin.com/in/shukridozom/',
+  github: 'https://github.com/Shukridozom',
 } as const;

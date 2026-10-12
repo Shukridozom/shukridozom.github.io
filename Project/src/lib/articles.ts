@@ -31,6 +31,12 @@ export function toSlug(title: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/** Leading number from a title like "11. My Article" → 11. */
+function leadingNumber(title: string): number | null {
+  const match = title.trim().match(/^(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
 function isDirectory(entryPath: string): boolean {
   return fs.statSync(entryPath).isDirectory();
 }
@@ -40,6 +46,14 @@ function readOptionalSummary(topicDir: string): string | null {
   if (!fs.existsSync(summaryPath)) return null;
   const text = fs.readFileSync(summaryPath, 'utf8').trim();
   return text.length > 0 ? text : null;
+}
+
+function resolvePagePath(articleDir: string): string | null {
+  for (const name of ['page.md', 'Page.md']) {
+    const candidate = path.join(articleDir, name);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
 }
 
 function findDirBySlug(parentDir: string, slug: string): string | null {
@@ -54,6 +68,36 @@ function findDirBySlug(parentDir: string, slug: string): string | null {
   return match ?? null;
 }
 
+function compareByLeadingNumber(aTitle: string, bTitle: string): number {
+  const aNum = leadingNumber(aTitle);
+  const bNum = leadingNumber(bTitle);
+
+  if (aNum != null && bNum != null && aNum !== bNum) {
+    return aNum - bNum;
+  }
+  if (aNum != null && bNum == null) return -1;
+  if (aNum == null && bNum != null) return 1;
+  return aTitle.localeCompare(bTitle, undefined, { sensitivity: 'base' });
+}
+
+function listArticles(topicDir: string, topicTitle: string, topicSlug: string): ArticleSummary[] {
+  return fs
+    .readdirSync(topicDir)
+    .map((name) => path.join(topicDir, name))
+    .filter(isDirectory)
+    .filter((articleDir) => resolvePagePath(articleDir) != null)
+    .map((articleDir) => {
+      const articleTitle = path.basename(articleDir);
+      return {
+        title: articleTitle,
+        slug: toSlug(articleTitle),
+        topicSlug,
+        topicTitle,
+      };
+    })
+    .sort((a, b) => compareByLeadingNumber(a.title, b.title));
+}
+
 export function getTopics(): Topic[] {
   if (!fs.existsSync(articlesRoot)) return [];
 
@@ -64,30 +108,18 @@ export function getTopics(): Topic[] {
     .map((topicDir) => {
       const title = path.basename(topicDir);
       const slug = toSlug(title);
-      const articles = fs
-        .readdirSync(topicDir)
-        .map((name) => path.join(topicDir, name))
-        .filter(isDirectory)
-        .filter((articleDir) => fs.existsSync(path.join(articleDir, 'page.md')))
-        .map((articleDir) => {
-          const articleTitle = path.basename(articleDir);
-          return {
-            title: articleTitle,
-            slug: toSlug(articleTitle),
-            topicSlug: slug,
-            topicTitle: title,
-          };
-        })
-        .sort((a, b) => a.title.localeCompare(b.title));
-
       return {
         title,
         slug,
         summary: readOptionalSummary(topicDir),
-        articles,
+        articles: listArticles(topicDir, title, slug),
       };
     })
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .sort((a, b) => compareByLeadingNumber(a.title, b.title));
+}
+
+export function getTopic(topicSlug: string): Topic | null {
+  return getTopics().find((topic) => topic.slug === topicSlug) ?? null;
 }
 
 export function getArticle(topicSlug: string, articleSlug: string): Article | null {
@@ -97,8 +129,8 @@ export function getArticle(topicSlug: string, articleSlug: string): Article | nu
   const articleDir = findDirBySlug(topicDir, articleSlug);
   if (!articleDir) return null;
 
-  const pagePath = path.join(articleDir, 'page.md');
-  if (!fs.existsSync(pagePath)) return null;
+  const pagePath = resolvePagePath(articleDir);
+  if (!pagePath) return null;
 
   const topicTitle = path.basename(topicDir);
   const articleTitle = path.basename(articleDir);

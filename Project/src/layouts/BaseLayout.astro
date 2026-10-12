@@ -1,18 +1,21 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import { site } from '../data/site';
 
 interface Props {
   title: string;
   description?: string;
+  /** Skip the centered container — used for full-bleed layouts like article pages. */
+  fullBleed?: boolean;
 }
 
-const { title, description = 'Personal portfolio' } = Astro.props;
+const { title, description = 'Personal portfolio', fullBleed = false } = Astro.props;
 const pageTitle = title === 'Home' ? site.name : `${title} · ${site.name}`;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="auto">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,17 +24,31 @@ const pageTitle = title === 'Home' ? site.name : `${title} · ${site.name}`;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script is:inline>
+      (() => {
+        const value = localStorage.getItem('theme');
+        document.documentElement.dataset.theme =
+          value === 'light' || value === 'dark' || value === 'auto' ? value : 'auto';
+      })();
+    </script>
+    <ClientRouter />
     <title>{pageTitle}</title>
   </head>
-  <body>
+  <body class:list={[{ 'has-full-bleed': fullBleed }]}>
     <slot name="nav" />
-    <main class="site-main">
-      <div class="container">
-        <slot />
-      </div>
+    <main class:list={['site-main', { 'site-main--flush': fullBleed }]} transition:animate="fade">
+      {
+        fullBleed ? (
+          <slot />
+        ) : (
+          <div class="container">
+            <slot />
+          </div>
+        )
+      }
     </main>
   </body>
 </html>
