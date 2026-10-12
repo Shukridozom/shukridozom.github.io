@@ -5,9 +5,11 @@ import { site } from '../data/site';
 interface Props {
   title: string;
   description?: string;
+  /** Skip the centered container — used for full-bleed layouts like article pages. */
+  fullBleed?: boolean;
 }
 
-const { title, description = 'Personal portfolio' } = Astro.props;
+const { title, description = 'Personal portfolio', fullBleed = false } = Astro.props;
 const pageTitle = title === 'Home' ? site.name : `${title} · ${site.name}`;
 ---
 
@@ -26,12 +28,18 @@ const pageTitle = title === 'Home' ? site.name : `${title} · ${site.name}`;
     />
     <title>{pageTitle}</title>
   </head>
-  <body>
+  <body class:list={[{ 'has-full-bleed': fullBleed }]}>
     <slot name="nav" />
-    <main class="site-main">
-      <div class="container">
-        <slot />
-      </div>
+    <main class:list={['site-main', { 'site-main--flush': fullBleed }]}>
+      {
+        fullBleed ? (
+          <slot />
+        ) : (
+          <div class="container">
+            <slot />
+          </div>
+        )
+      }
     </main>
   </body>
 </html>

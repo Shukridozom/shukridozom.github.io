@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Nav from '../../../components/Nav.astro';
-import { getAllArticles, getArticle } from '../../../lib/articles';
+import ArticleSidebar from '../../../components/ArticleSidebar.astro';
+import { getAllArticles, getArticle, getTopic } from '../../../lib/articles';
 
 export function getStaticPaths() {
   return getAllArticles().map((article) => ({
@@ -14,30 +15,181 @@ export function getStaticPaths() {
 
 const { topic, article: articleParam } = Astro.params;
 const article = getArticle(topic!, articleParam!);
+const topicData = getTopic(topic!);
 
-if (!article) {
+if (!article || !topicData) {
   throw new Error(`Article not found: ${topic}/${articleParam}`);
 }
 
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title={article.title} description={`${article.title} — ${article.topicTitle}`}>
+<BaseLayout
+  title={article.title}
+  description={`${article.title} — ${article.topicTitle}`}
+  fullBleed
+>
   <Nav slot="nav" />
 
-  <p class="crumb">
-    <a href={`${base}articles/`}>Articles</a>
-    <span aria-hidden="true"> / </span>
-    <span>{article.topicTitle}</span>
-  </p>
+  <div class="article-shell" data-article-shell>
+    <button
+      class="icon-toggle mobile-sidebar-open"
+      type="button"
+      aria-label="Open article list"
+      data-mobile-sidebar-open
+    >
+      <span class="icon-toggle-bar" aria-hidden="true"></span>
+      <span class="icon-toggle-bar" aria-hidden="true"></span>
+      <span class="icon-toggle-bar" aria-hidden="true"></span>
+    </button>
 
-  <article class="prose" set:html={article.html} />
+    <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+
+    <div class="sidebar-column">
+      <ArticleSidebar
+        topicTitle={topicData.title}
+        topicSlug={topicData.slug}
+        articles={topicData.articles}
+        currentSlug={article.slug}
+      />
+    </div>
+
+    <div class="article-content">
+      <p class="crumb">
+        <a href={`${base}articles/`}>Articles</a>
+        <span aria-hidden="true"> / </span>
+        <a href={`${base}articles/${article.topicSlug}/`}>{article.topicTitle}</a>
+      </p>
+
+      <article class="prose article-body" set:html={article.html} />
+    </div>
+  </div>
 </BaseLayout>
 
+<script>
+  const shell = document.querySelector('[data-article-shell]');
+  const openBtn = document.querySelector('[data-mobile-sidebar-open]');
+  const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+
+  if (shell && openBtn instanceof HTMLButtonElement && sidebarToggle instanceof HTMLButtonElement) {
+    openBtn.addEventListener('click', () => {
+      sidebarToggle.click();
+    });
+  }
+</script>
+
 <style>
+  .article-shell {
+    --sidebar-width: 18.5rem;
+    --sidebar-collapsed-width: 3.5rem;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    min-height: calc(100vh - var(--nav-height));
+    transition: grid-template-columns 0.2s ease;
+  }
+
+  .article-shell.sidebar-collapsed {
+    grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
+  }
+
+  .mobile-sidebar-open {
+    display: none;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+  }
+
+  .sidebar-column {
+    position: sticky;
+    top: var(--nav-height);
+    height: calc(100vh - var(--nav-height));
+    align-self: start;
+    min-width: 0;
+    z-index: 5;
+  }
+
+  .article-content {
+    min-width: 0;
+    padding: 2rem clamp(1rem, 3vw, 2.5rem) 3.5rem;
+  }
+
   .crumb {
     margin: 0 0 1.25rem;
     color: var(--color-muted);
     font-size: 0.95rem;
+  }
+
+  .crumb a {
+    text-decoration: none;
+  }
+
+  .crumb a:hover {
+    text-decoration: underline;
+  }
+
+  .article-body {
+    max-width: 46rem;
+  }
+
+  .article-body :global(> :first-child) {
+    margin-top: 0;
+  }
+
+  @media (max-width: 819px) {
+    .article-shell,
+    .article-shell.sidebar-collapsed {
+      grid-template-columns: 1fr;
+      min-height: calc(100vh - var(--nav-height));
+    }
+
+    .mobile-sidebar-open {
+      display: inline-flex;
+      position: sticky;
+      top: calc(var(--nav-height) + 0.65rem);
+      z-index: 4;
+      margin: 0.85rem 1rem 0;
+    }
+
+    .article-shell.sidebar-open .mobile-sidebar-open {
+      display: none;
+    }
+
+    .sidebar-backdrop {
+      display: block;
+      position: fixed;
+      inset: var(--nav-height) 0 0;
+      background: rgb(28 25 21 / 35%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 6;
+    }
+
+    .article-shell.sidebar-open .sidebar-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar-column {
+      position: fixed;
+      top: var(--nav-height);
+      left: 0;
+      bottom: 0;
+      width: min(20rem, 86vw);
+      height: auto;
+      z-index: 7;
+      transform: translateX(-105%);
+      transition: transform 0.2s ease;
+      box-shadow: 8px 0 28px rgb(28 25 21 / 12%);
+    }
+
+    .article-shell.sidebar-open .sidebar-column {
+      transform: translateX(0);
+    }
+
+    .article-content {
+      padding: 0.75rem 1rem 3rem;
+    }
   }
 </style>

@@ -57,13 +57,21 @@ Update `site` in [`Project/astro.config.mjs`](Project/astro.config.mjs) to match
 
 ### Articles (where to add them)
 
-Articles live under [`Project/Articles/`](Project/Articles/). Folder names become titles; URLs use hyphenated slugs (e.g. `Getting Started` → `/articles/getting-started/...`).
+Articles live under [`Project/Articles/`](Project/Articles/). Folder names become titles; URLs use hyphenated slugs (e.g. `Topic 1` → `/articles/topic-1/`).
+
+**How browsing works**
+
+1. `/articles` — topic cards (title + summary only). Click a card to open the topic.
+2. `/articles/<topic>/` — list of articles in that topic.
+3. `/articles/<topic>/<article>/` — article page with a left sidebar of sibling articles (toggle to hide/show).
+
+**Add content**
 
 1. Create a topic folder: `Project/Articles/Your Topic Name/`
-2. Optional: add `summary.txt` in that folder (shown on the Articles cards page).
-3. Create an article folder inside the topic: `Project/Articles/Your Topic Name/Your Article Name/`
-4. Add the Markdown content as `page.md` inside that article folder.
-5. Preview at `/articles`. Open an article from the topic card list.
+2. Optional: add `summary.txt` in that folder (shown on the topic card).
+3. Create an article folder: `Project/Articles/Your Topic Name/Your Article Name/`
+4. Add Markdown as `page.md` (or `Page.md`) inside that article folder.
+5. Preview at `/articles`.
 
 Layout:
 
@@ -71,11 +79,19 @@ Layout:
 Project/Articles/
 ├── Topic Name/
 │   ├── summary.txt          (optional)
-│   └── Article Name/
+│   └── 1. Article Name/
 │       └── page.md          (required)
 ```
 
-Example already in the repo: [`Project/Articles/Getting Started/Welcome/page.md`](Project/Articles/Getting%20Started/Welcome/page.md).
+**Article order**
+
+Number articles in the **folder name**, for example:
+
+- `1. Sharing System Objects Across Project Files`
+- `2. Encapsulating Nested Objects…`
+- `11. Something Else`
+
+The site sorts by that leading number, so you get `1, 2, 11` (not `1, 11, 2`). No extra `order.txt` file is needed.
 
 ### Projects (where to add them)
 

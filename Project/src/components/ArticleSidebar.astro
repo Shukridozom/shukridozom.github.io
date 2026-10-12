@@ -1,0 +1,170 @@
+---
+import type { ArticleSummary } from '../lib/articles';
+
+interface Props {
+  topicTitle: string;
+  topicSlug: string;
+  articles: ArticleSummary[];
+  currentSlug: string;
+}
+
+const { topicTitle, topicSlug, articles, currentSlug } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<aside class="article-sidebar" data-article-sidebar>
+  <div class="sidebar-header">
+    <a class="topic-link" href={`${base}articles/${topicSlug}/`}>{topicTitle}</a>
+    <button
+      class="icon-toggle sidebar-toggle"
+      type="button"
+      aria-expanded="true"
+      aria-controls="article-sidebar-panel"
+      aria-label="Hide article list"
+      data-sidebar-toggle
+    >
+      <span class="icon-toggle-bar" aria-hidden="true"></span>
+      <span class="icon-toggle-bar" aria-hidden="true"></span>
+      <span class="icon-toggle-bar" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <nav class="article-nav" id="article-sidebar-panel" aria-label="Articles in this topic" data-sidebar-panel>
+    <ul>
+      {
+        articles.map((item) => (
+          <li>
+            <a
+              href={`${base}articles/${item.topicSlug}/${item.slug}/`}
+              class:list={[{ active: item.slug === currentSlug }]}
+              aria-current={item.slug === currentSlug ? 'page' : undefined}
+            >
+              {item.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</aside>
+
+<script>
+  const root = document.querySelector('[data-article-sidebar]');
+  const shell = document.querySelector('[data-article-shell]');
+  const backdrop = document.querySelector('[data-sidebar-backdrop]');
+  const toggle = root?.querySelector('[data-sidebar-toggle]');
+
+  if (root && shell && toggle instanceof HTMLButtonElement) {
+    const mq = window.matchMedia('(max-width: 819px)');
+
+    const setOpen = (open: boolean) => {
+      root.classList.toggle('is-collapsed', !open);
+      shell.classList.toggle('sidebar-collapsed', !open);
+      shell.classList.toggle('sidebar-open', open);
+      toggle.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close article list' : 'Open article list');
+      document.body.classList.toggle('sidebar-drawer-open', open && mq.matches);
+    };
+
+    setOpen(!mq.matches);
+
+    toggle.addEventListener('click', () => {
+      setOpen(root.classList.contains('is-collapsed'));
+    });
+
+    backdrop?.addEventListener('click', () => setOpen(false));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+
+    mq.addEventListener('change', (event) => {
+      setOpen(!event.matches);
+    });
+  }
+</script>
+
+<style>
+  .article-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    height: 100%;
+    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg-accent));
+    border-right: 1px solid var(--color-border);
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.1rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .topic-link {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+    line-height: 1.25;
+    padding-top: 0.35rem;
+  }
+
+  .topic-link:hover {
+    color: var(--color-accent);
+  }
+
+  .sidebar-toggle {
+    flex-shrink: 0;
+  }
+
+  .article-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.85rem 0.75rem 1.5rem;
+  }
+
+  .article-sidebar.is-collapsed .topic-link,
+  .article-sidebar.is-collapsed .article-nav {
+    display: none;
+  }
+
+  .article-sidebar.is-collapsed .sidebar-header {
+    justify-content: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 0;
+  }
+
+  .article-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .article-nav li + li {
+    margin-top: 0.15rem;
+  }
+
+  .article-nav a {
+    display: block;
+    padding: 0.55rem 0.65rem;
+    border-radius: 0.4rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .article-nav a:hover,
+  .article-nav a.active {
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+</style>
