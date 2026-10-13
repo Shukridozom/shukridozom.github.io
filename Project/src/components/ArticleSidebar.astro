@@ -12,7 +12,7 @@ const { topicTitle, topicSlug, articles, currentSlug } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
-<aside class="article-sidebar" data-article-sidebar>
+<aside class="article-sidebar" data-article-sidebar data-topic={topicSlug}>
   <div class="sidebar-header">
     <a class="topic-link" href={`${base}articles/${topicSlug}/`}>{topicTitle}</a>
     <button
@@ -88,8 +88,31 @@ const base = import.meta.env.BASE_URL;
     });
   };
 
+  const getSidebarPanel = () => {
+    const root = document.querySelector('[data-article-sidebar]');
+    const panel = root?.querySelector('[data-sidebar-panel]');
+    if (!(root instanceof HTMLElement) || !(panel instanceof HTMLElement)) return null;
+    return { key: `article-sidebar-scroll:${root.dataset.topic}`, panel };
+  };
+
+  const saveSidebarScroll = () => {
+    const sidebar = getSidebarPanel();
+    if (sidebar) sessionStorage.setItem(sidebar.key, String(sidebar.panel.scrollTop));
+  };
+
+  const restoreSidebarScroll = () => {
+    const sidebar = getSidebarPanel();
+    const saved = sidebar && sessionStorage.getItem(sidebar.key);
+    if (sidebar && saved !== null) sidebar.panel.scrollTop = Number(saved);
+  };
+
   bindSidebar();
+  restoreSidebarScroll();
   document.addEventListener('astro:page-load', bindSidebar);
+  // The router replaces the sidebar on every navigation, so carry its scroll position across.
+  document.addEventListener('astro:before-preparation', saveSidebarScroll);
+  document.addEventListener('astro:after-swap', restoreSidebarScroll);
+  window.addEventListener('pagehide', saveSidebarScroll);
 </script>
 
 <style>
