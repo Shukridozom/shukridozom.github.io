@@ -81,14 +81,10 @@ if (!article || !topicData) {
   .article-shell {
     --sidebar-width: 18.5rem;
     --sidebar-collapsed-width: 3.5rem;
+    --content-gap: clamp(1rem, 3vw, 2.5rem);
     display: grid;
-    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     min-height: calc(100vh - var(--nav-height));
-    transition: grid-template-columns var(--motion);
-  }
-
-  .article-shell.sidebar-collapsed {
-    grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
   }
 
   .mobile-sidebar-open {
@@ -99,18 +95,43 @@ if (!article || !topicData) {
     display: none;
   }
 
+  /* Sidebar and article share one full-width cell, so the article's % padding
+     resolves against the same width as the header's .container. */
   .sidebar-column {
+    grid-area: 1 / 1;
+    justify-self: start;
     position: sticky;
     top: var(--nav-height);
+    width: var(--sidebar-width);
     height: calc(100vh - var(--nav-height));
     align-self: start;
     min-width: 0;
     z-index: 5;
+    transition: width var(--motion);
+  }
+
+  .article-shell.sidebar-collapsed .sidebar-column {
+    width: var(--sidebar-collapsed-width);
   }
 
   .article-content {
+    grid-area: 1 / 1;
     min-width: 0;
-    padding: 2rem clamp(1rem, 3vw, 2.5rem) 3.5rem;
+    padding: 2rem var(--content-gap) 3.5rem;
+    padding-left: max(
+      calc((100% - var(--max-width)) / 2),
+      1rem,
+      calc(var(--sidebar-width) + var(--content-gap))
+    );
+    transition: padding-left var(--motion);
+  }
+
+  .article-shell.sidebar-collapsed .article-content {
+    padding-left: max(
+      calc((100% - var(--max-width)) / 2),
+      1rem,
+      calc(var(--sidebar-collapsed-width) + 1rem)
+    );
   }
 
   .article-body {
@@ -126,6 +147,11 @@ if (!article || !topicData) {
     .article-shell.sidebar-collapsed {
       grid-template-columns: 1fr;
       min-height: calc(100vh - var(--nav-height));
+    }
+
+    .sidebar-column,
+    .article-content {
+      grid-area: auto;
     }
 
     .mobile-sidebar-open {
@@ -158,7 +184,8 @@ if (!article || !topicData) {
     }
 
     /* Match main navbar mobile menu: full-width card under the header. */
-    .sidebar-column {
+    .sidebar-column,
+    .article-shell.sidebar-collapsed .sidebar-column {
       position: fixed;
       top: calc(var(--nav-height) + 0.65rem);
       left: 1rem;
@@ -185,8 +212,10 @@ if (!article || !topicData) {
       transform: translateY(0);
     }
 
-    .article-content {
+    .article-content,
+    .article-shell.sidebar-collapsed .article-content {
       padding: 0.75rem 1rem 3rem;
+      transition: none;
     }
   }
 </style>
