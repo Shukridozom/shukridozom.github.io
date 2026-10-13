@@ -209,6 +209,10 @@ body.sidebar-drawer-open {
   max-width: 42rem;
 }
 
+.prose :where(img) {
+  margin-inline: auto;
+}
+
 .prose :where(h1, h2, h3) {
   margin-top: 1.75rem;
   margin-bottom: 0.65rem;
