@@ -8,9 +8,11 @@ interface Props {
   description?: string;
   /** Skip the centered container — used for full-bleed layouts like article pages. */
   fullBleed?: boolean;
+  /** Fade the whole main area on navigation; pages can opt out and fade only part of it. */
+  fadeMain?: boolean;
 }
 
-const { title, description = 'Personal portfolio', fullBleed = false } = Astro.props;
+const { title, description = 'Personal portfolio', fullBleed = false, fadeMain = true } = Astro.props;
 const pageTitle = title === 'Home' ? site.name : `${title} · ${site.name}`;
 ---
 
@@ -39,16 +41,18 @@ const pageTitle = title === 'Home' ? site.name : `${title} · ${site.name}`;
   </head>
   <body class:list={[{ 'has-full-bleed': fullBleed }]}>
     <slot name="nav" />
-    <main class:list={['site-main', { 'site-main--flush': fullBleed }]} transition:animate="fade">
-      {
-        fullBleed ? (
-          <slot />
-        ) : (
-          <div class="container">
-            <slot />
-          </div>
-        )
-      }
-    </main>
+    {
+      fadeMain ? (
+        <main class:list={['site-main', { 'site-main--flush': fullBleed }]} transition:animate="fade">
+          {fullBleed ? <slot /> : <div class="container"><slot /></div>}
+        </main>
+      ) : (
+        /* No transition directive: unchanged parts fall into the browser's root crossfade, which is
+           invisible for identical pixels. Astro's "none" hides the old snapshot and blanks the area. */
+        <main class:list={['site-main', { 'site-main--flush': fullBleed }]}>
+          {fullBleed ? <slot /> : <div class="container"><slot /></div>}
+        </main>
+      )
+    }
   </body>
 </html>

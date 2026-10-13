@@ -27,6 +27,7 @@ if (!article || !topicData) {
   title={article.title}
   description={`${article.title} — ${article.topicTitle}`}
   fullBleed
+  fadeMain={false}
 >
   <Nav slot="nav" />
 
@@ -53,7 +54,7 @@ if (!article || !topicData) {
       />
     </div>
 
-    <div class="article-content">
+    <div class="article-content" transition:animate="fade">
       <article class="prose article-body" set:html={article.html} />
     </div>
   </div>
@@ -193,6 +194,9 @@ if (!article || !topicData) {
       bottom: 1rem;
       width: auto;
       height: auto;
+      /* Desktop's `start` alignment would size the fixed drawer to its content instead of the insets. */
+      align-self: stretch;
+      justify-self: stretch;
       z-index: 7;
       opacity: 0;
       visibility: hidden;

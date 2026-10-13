@@ -16,11 +16,11 @@ const base = import.meta.env.BASE_URL;
   <div class="sidebar-header">
     <a class="topic-link" href={`${base}articles/${topicSlug}/`}>{topicTitle}</a>
     <button
-      class="icon-toggle sidebar-toggle"
+      class="icon-toggle sidebar-toggle is-open"
       type="button"
       aria-expanded="true"
       aria-controls="article-sidebar-panel"
-      aria-label="Hide article list"
+      aria-label="Close article list"
       data-sidebar-toggle
     >
       <span class="icon-toggle-bar" aria-hidden="true"></span>
@@ -49,70 +49,89 @@ const base = import.meta.env.BASE_URL;
 </aside>
 
 <script>
-  const bindSidebar = () => {
+  const mq = window.matchMedia('(max-width: 819px)');
+  const openKey = 'article-sidebar-open';
+
+  const getParts = () => {
     const root = document.querySelector('[data-article-sidebar]');
     const shell = document.querySelector('[data-article-shell]');
-    const backdrop = document.querySelector('[data-sidebar-backdrop]');
     const toggle = root?.querySelector('[data-sidebar-toggle]');
-
-    if (!root || !shell || !(toggle instanceof HTMLButtonElement)) return;
-    if (toggle.dataset.bound === 'true') return;
-    toggle.dataset.bound = 'true';
-
-    const mq = window.matchMedia('(max-width: 819px)');
-
-    const setOpen = (open: boolean) => {
-      root.classList.toggle('is-collapsed', !open);
-      shell.classList.toggle('sidebar-collapsed', !open);
-      shell.classList.toggle('sidebar-open', open);
-      toggle.classList.toggle('is-open', open);
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Close article list' : 'Open article list');
-      document.body.classList.toggle('sidebar-drawer-open', open && mq.matches);
-    };
-
-    setOpen(!mq.matches);
-
-    toggle.addEventListener('click', () => {
-      setOpen(root.classList.contains('is-collapsed'));
-    });
-
-    backdrop?.addEventListener('click', () => setOpen(false));
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') setOpen(false);
-    });
-
-    mq.addEventListener('change', (event) => {
-      setOpen(!event.matches);
-    });
-  };
-
-  const getSidebarPanel = () => {
-    const root = document.querySelector('[data-article-sidebar]');
     const panel = root?.querySelector('[data-sidebar-panel]');
-    if (!(root instanceof HTMLElement) || !(panel instanceof HTMLElement)) return null;
-    return { key: `article-sidebar-scroll:${root.dataset.topic}`, panel };
+    if (
+      !(root instanceof HTMLElement) ||
+      !(shell instanceof HTMLElement) ||
+      !(toggle instanceof HTMLButtonElement) ||
+      !(panel instanceof HTMLElement)
+    ) {
+      return null;
+    }
+    return { root, shell, toggle, panel, scrollKey: `article-sidebar-scroll:${root.dataset.topic}` };
   };
 
-  const saveSidebarScroll = () => {
-    const sidebar = getSidebarPanel();
-    if (sidebar) sessionStorage.setItem(sidebar.key, String(sidebar.panel.scrollTop));
+  const isOpen = () => !getParts()?.root.classList.contains('is-collapsed');
+
+  const setOpen = (open: boolean, remember = true) => {
+    const parts = getParts();
+    if (!parts) return;
+    const { root, shell, toggle } = parts;
+    root.classList.toggle('is-collapsed', !open);
+    shell.classList.toggle('sidebar-collapsed', !open);
+    shell.classList.toggle('sidebar-open', open);
+    toggle.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close article list' : 'Open article list');
+    document.body.classList.toggle('sidebar-drawer-open', open && mq.matches);
+    if (remember && !mq.matches) sessionStorage.setItem(openKey, String(open));
   };
 
-  const restoreSidebarScroll = () => {
-    const sidebar = getSidebarPanel();
-    const saved = sidebar && sessionStorage.getItem(sidebar.key);
-    if (sidebar && saved !== null) sidebar.panel.scrollTop = Number(saved);
+  // Runs on the incoming page before it is shown, so the sidebar never visibly changes state.
+  // Desktop keeps the last open/closed choice; the mobile drawer always starts closed.
+  const applyState = () => {
+    const parts = getParts();
+    if (!parts) return;
+    setOpen(!mq.matches && sessionStorage.getItem(openKey) !== 'false', false);
+    const savedScroll = sessionStorage.getItem(parts.scrollKey);
+    if (savedScroll !== null) parts.panel.scrollTop = Number(savedScroll);
   };
 
-  bindSidebar();
-  restoreSidebarScroll();
-  document.addEventListener('astro:page-load', bindSidebar);
-  // The router replaces the sidebar on every navigation, so carry its scroll position across.
-  document.addEventListener('astro:before-preparation', saveSidebarScroll);
-  document.addEventListener('astro:after-swap', restoreSidebarScroll);
-  window.addEventListener('pagehide', saveSidebarScroll);
+  const saveScroll = () => {
+    const parts = getParts();
+    if (parts) sessionStorage.setItem(parts.scrollKey, String(parts.panel.scrollTop));
+  };
+
+  // The outgoing sidebar stays on screen until the swap, so highlight the destination now;
+  // otherwise the old and new highlights show together and the old one snaps away.
+  const highlightDestination = (to: URL) => {
+    const parts = getParts();
+    if (!parts) return;
+    parts.root.dataset.navigating = 'true';
+    parts.panel.querySelectorAll('a').forEach((link) => {
+      const isTarget = new URL(link.href).pathname === to.pathname;
+      link.classList.toggle('active', isTarget);
+      if (isTarget) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('[data-sidebar-toggle]')) setOpen(!isOpen());
+    else if (target?.closest('[data-sidebar-backdrop]')) setOpen(false);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && getParts()) setOpen(false);
+  });
+
+  mq.addEventListener('change', applyState);
+
+  applyState();
+  document.addEventListener('astro:before-preparation', (event) => {
+    saveScroll();
+    highlightDestination((event as Event & { to: URL }).to);
+  });
+  document.addEventListener('astro:after-swap', applyState);
+  window.addEventListener('pagehide', saveScroll);
 </script>
 
 <style>
@@ -197,6 +216,11 @@ const base = import.meta.env.BASE_URL;
     transition:
       color var(--motion),
       background-color var(--motion);
+  }
+
+  /* Switch the highlight instantly while navigating so the outgoing snapshot matches the new page. */
+  .article-sidebar[data-navigating] .article-nav a {
+    transition: none;
   }
 
   .article-nav a:hover,
