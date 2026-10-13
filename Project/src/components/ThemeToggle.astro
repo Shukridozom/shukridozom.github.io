@@ -65,6 +65,10 @@
 
   bind();
   document.addEventListener('astro:page-load', bind);
+  // The router copies the new page's <html data-theme="auto">; restore the saved choice before it is shown.
+  document.addEventListener('astro:after-swap', () => {
+    document.documentElement.dataset.theme = getPref();
+  });
 </script>
 
 <style>

@@ -20,12 +20,10 @@ const base = import.meta.env.BASE_URL;
       <div class="topic-grid">
         {topics.map((topic) => (
           <a class="topic-card" href={`${base}articles/${topic.slug}/`}>
-            <h2 class="topic-title">{topic.title}</h2>
-            {topic.summary ? (
-              <p class="topic-summary">{topic.summary}</p>
-            ) : (
-              <p class="topic-summary muted">Open topic to view articles.</p>
-            )}
+            <h2 class:list={['topic-title', { 'topic-title--solo': !topic.summary }]}>
+              {topic.title}
+            </h2>
+            {topic.summary && <p class="topic-summary">{topic.summary}</p>}
           </a>
         ))}
       </div>
@@ -62,13 +60,13 @@ const base = import.meta.env.BASE_URL;
     font-weight: 600;
   }
 
+  .topic-title--solo {
+    margin-bottom: 0;
+  }
+
   .topic-summary {
     margin: 0;
     color: var(--color-muted);
     font-size: 0.98rem;
-  }
-
-  .topic-summary.muted {
-    font-style: italic;
   }
 </style>

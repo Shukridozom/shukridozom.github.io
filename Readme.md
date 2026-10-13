@@ -72,7 +72,8 @@ Articles live under [`Project/Articles/`](Project/Articles/). Folder names becom
 2. Optional: add `summary.txt` in that folder (shown on the topic card).
 3. Create an article folder: `Project/Articles/Your Topic Name/Your Article Name/`
 4. Add Markdown as `page.md` (or `Page.md`) inside that article folder.
-5. Preview at `/articles`.
+5. Optional: put images in an `assets/` folder next to `page.md`, and reference them as `![Alt](assets/your-image.png)`.
+6. Preview at `/articles`.
 
 Layout:
 
@@ -81,7 +82,9 @@ Project/Articles/
 ├── Topic Name/
 │   ├── summary.txt          (optional)
 │   └── 1. Article Name/
-│       └── page.md          (required)
+│       ├── page.md          (required)
+│       └── assets/          (optional images)
+│           └── diagram.png
 ```
 
 **Article order**

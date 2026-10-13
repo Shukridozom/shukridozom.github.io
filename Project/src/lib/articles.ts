@@ -3,6 +3,7 @@ import path from 'node:path';
 import { marked } from 'marked';
 
 const articlesRoot = path.join(process.cwd(), 'Articles');
+const articleAssetsPublicRoot = 'article-assets';
 
 export interface Topic {
   title: string;
@@ -80,6 +81,49 @@ function compareByLeadingNumber(aTitle: string, bTitle: string): number {
   return aTitle.localeCompare(bTitle, undefined, { sensitivity: 'base' });
 }
 
+/** Copy article `assets/` into public so Astro can serve the files. */
+function copyArticleAssets(articleDir: string, topicSlug: string, articleSlug: string): void {
+  const srcAssets = path.join(articleDir, 'assets');
+  if (!fs.existsSync(srcAssets) || !isDirectory(srcAssets)) return;
+
+  const dest = path.join(
+    process.cwd(),
+    'public',
+    articleAssetsPublicRoot,
+    topicSlug,
+    articleSlug,
+  );
+
+  fs.rmSync(dest, { recursive: true, force: true });
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.cpSync(srcAssets, dest, { recursive: true });
+}
+
+function isAbsoluteOrExternalUrl(url: string): boolean {
+  return /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(url);
+}
+
+/** Rewrite relative media `src` paths to the published article-assets URL. */
+function rewriteRelativeMediaUrls(
+  html: string,
+  topicSlug: string,
+  articleSlug: string,
+): string {
+  const base = `/${articleAssetsPublicRoot}/${topicSlug}/${articleSlug}`;
+
+  return html.replace(/\bsrc=(["'])([^"']+)\1/gi, (match, quote: string, src: string) => {
+    if (isAbsoluteOrExternalUrl(src)) return match;
+    if (src.includes('..')) return match;
+
+    let rel = src.replace(/^\.\//, '');
+    if (rel.startsWith('assets/')) {
+      rel = rel.slice('assets/'.length);
+    }
+
+    return `src=${quote}${base}/${rel}${quote}`;
+  });
+}
+
 function listArticles(topicDir: string, topicTitle: string, topicSlug: string): ArticleSummary[] {
   return fs
     .readdirSync(topicDir)
@@ -134,13 +178,19 @@ export function getArticle(topicSlug: string, articleSlug: string): Article | nu
 
   const topicTitle = path.basename(topicDir);
   const articleTitle = path.basename(articleDir);
+  const resolvedTopicSlug = toSlug(topicTitle);
+  const resolvedArticleSlug = toSlug(articleTitle);
+
+  copyArticleAssets(articleDir, resolvedTopicSlug, resolvedArticleSlug);
+
   const markdown = fs.readFileSync(pagePath, 'utf8');
-  const html = marked.parse(markdown, { async: false }) as string;
+  const rawHtml = marked.parse(markdown, { async: false }) as string;
+  const html = rewriteRelativeMediaUrls(rawHtml, resolvedTopicSlug, resolvedArticleSlug);
 
   return {
     title: articleTitle,
-    slug: toSlug(articleTitle),
-    topicSlug: toSlug(topicTitle),
+    slug: resolvedArticleSlug,
+    topicSlug: resolvedTopicSlug,
     topicTitle,
     html,
   };

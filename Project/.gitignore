@@ -2,6 +2,9 @@
 dist/
 .astro/
 
+# generated copies of Articles/*/assets (rebuilt on page load / build)
+public/article-assets/
+
 # dependencies
 node_modules/
 

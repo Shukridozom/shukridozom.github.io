@@ -209,6 +209,10 @@ body.sidebar-drawer-open {
   max-width: 42rem;
 }
 
+.prose :where(img) {
+  margin-inline: auto;
+}
+
 .prose :where(h1, h2, h3) {
   margin-top: 1.75rem;
   margin-bottom: 0.65rem;
@@ -247,8 +251,10 @@ body.sidebar-drawer-open {
   }
 }
 
-.site-main {
-  animation: page-enter 0.28s ease both;
+/* `backwards` so no transform lingers afterwards (it would trap fixed drawers inside <main>).
+   Article pages are skipped: they fade only the article text, and the sidebar must stay still. */
+.site-main:not(.site-main--flush) {
+  animation: page-enter 0.28s ease backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
