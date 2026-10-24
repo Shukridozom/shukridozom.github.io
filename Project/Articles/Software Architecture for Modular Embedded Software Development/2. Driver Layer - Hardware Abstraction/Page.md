@@ -1,39 +1,40 @@
-# 2. Driver Layer Hardware Abstraction
+# 2. Driver Layer: Hardware Abstraction
 
-This layer is responsible about isolating the other layers (component - application) from the hardware / microcontroller, and this works by providing fixed APIs / ISRs signatures for them to consume instead of directly accessing the microcontroller .So when we change the microcontoller, we don't need to change or reimplement theses layers, instead, we reimpleement only the driver layer for that new microcontroller
+This layer isolates the component and application layers from the hardware and microcontroller. It does that by exposing fixed APIs and ISR signatures for those layers to use, instead of letting them access the microcontroller directly. When you change the microcontroller, you do not need to change or reimplement the upper layers—you reimplement only the driver layer for the new device.
 
-To design this layer we need to understand / define the level of the interaction with the hardware, for bare-metal/RTOS microcontrollers, there are two main interactions with them
+To design this layer, define how software interacts with the hardware. On bare-metal and RTOS-based microcontrollers, there are two main interactions:
 
-1. Software touches the perhipheral (from software to hardware)
-2. CPU sends interrupts which will be handeled by the ISRs (from hardware to software)
+1. Software touches the peripheral (software to hardware)
+2. The CPU raises interrupts that ISRs handle (hardware to software)
 
 ![Architecture Layers](assets/Interaction_with_microcontrollers.png)
 
-So, to acheive the hardware abstraction, we Implement APIs for direct hardware register access and CPU interrupt handling (ISRs).And to acheive this we use **C Programming Language** for acheiving maximum performance
+To achieve hardware abstraction, implement APIs for direct hardware register access and for CPU interrupt handling (ISRs). Use **C** for this layer so you can get maximum performance.
 
-Every driver / module unit will be consisting of
+Every driver module consists of:
 
-- Header files
-  - Every driver should have a header file that exposes the dirver APIs / ISRs declarations.
+- **Header files**
+  - Each driver should expose its API and ISR declarations in a header.
   - These APIs can be functions, macros, or inline functions.
-  - This file represents the interface for other layers
-  - It is also optional to arrage related things in spearated header files (for example, gathering the APIs in one header file, and the ISRs inside another one)
-- Source files ( .c files )
-  - These files will contain the actual implmentation for the driver APIs / ISRs
-  - You need to provide a "weak" attribute for the ISRs default implementation, so when the developer implements its callback in their application, they doesn't get a linker error (multiple definition for a single function)
+  - This file is the interface for the other layers.
+  - You can optionally split related declarations across headers—for example, APIs in one file and ISRs in another.
+- **Source files (`.c` files)**
+  - These files contain the actual implementation of the driver APIs and ISRs.
+  - Give ISR default implementations the `weak` attribute so that when a developer provides a callback in the application, the linker does not report a multiple-definition error.
 
-The driver layer implementation can be done in one of two ways:
+You can implement the driver layer in one of two ways:
 
-### 1. Directly access hardware registers and define interrupt vector handlers
+### 1. Access hardware registers directly and define interrupt vector handlers
 
-This will give the best performance, as you avoid any functions call overhead, however, this will slow the development as you have to go on for the low level development. You may choose this approach for critical drivers where performance is very critical
+This gives the best performance because you avoid extra function-call overhead. The trade-off is slower development, since you work at a low level. Prefer this approach for critical drivers where performance matters most.
 
-### 2. Wrap existing hardware-abstraction APIs and ISR callbacks provided by the underlying library
+### 2. Wrap existing hardware-abstraction APIs and ISR callbacks from an underlying library
 
-- This way is better for accelerating the development and relying on existing drviers libraries (you wrap the library APIs by your driver's APIs, and your driver ISRs with by the ISRs / Callbacks of the library).
-- This approach have two extra benefits as well
-  - you can rely on macros provided by the library to implement a single driver for multiple microcontrollers (from the same family for example)
-  - you can benefit from code-generation tools that abstracts you from configuring the peripheral, (for exmaple, stm32cubemx for stm32 microcontrollers)
-- howeve, while this approach accelerates the development, it will affect the performance a little bit due to the extra function calls, so it is a trade off.
+This approach speeds up development by relying on existing driver libraries. You wrap the library APIs with your driver’s APIs, and map your driver ISRs to the library’s ISRs or callbacks.
 
----
+It also has two extra benefits:
+
+- You can use macros from the library to implement a single driver for multiple microcontrollers (for example, devices in the same family).
+- You can use code-generation tools that configure peripherals for you (for example, STM32CubeMX for STM32 devices).
+
+The cost is a small performance hit from the extra function calls. That is the trade-off: faster development versus slightly lower performance.
