@@ -99,6 +99,30 @@ function copyArticleAssets(articleDir: string, topicSlug: string, articleSlug: s
   fs.cpSync(srcAssets, dest, { recursive: true });
 }
 
+/**
+ * Copy every article `assets/` folder into `public/article-assets/` before the
+ * build. Astro syncs `public` → `dist` before pages render, so copying only
+ * inside `getArticle` leaves images out of the deploy.
+ */
+export function syncAllArticleAssets(): void {
+  if (!fs.existsSync(articlesRoot)) return;
+
+  for (const topicName of fs.readdirSync(articlesRoot)) {
+    const topicDir = path.join(articlesRoot, topicName);
+    if (!isDirectory(topicDir)) continue;
+
+    const topicSlug = toSlug(topicName);
+
+    for (const articleName of fs.readdirSync(topicDir)) {
+      const articleDir = path.join(topicDir, articleName);
+      if (!isDirectory(articleDir)) continue;
+      if (!resolvePagePath(articleDir)) continue;
+
+      copyArticleAssets(articleDir, topicSlug, toSlug(articleName));
+    }
+  }
+}
+
 function isAbsoluteOrExternalUrl(url: string): boolean {
   return /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(url);
 }
