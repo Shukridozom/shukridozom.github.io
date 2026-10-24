@@ -1,0 +1,1 @@
+# 7. Accessing private members of a class inside another class - friend keyword
