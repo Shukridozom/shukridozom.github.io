@@ -1,4 +1,4 @@
-# 12. Deploying Components and Drivers
+# 15. Deploying Components and Drivers
 
 Explore two approaches for distributing and integrating the output of the Component and Driver layers:
 - **Source Code:**
