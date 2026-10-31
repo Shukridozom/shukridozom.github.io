@@ -1,4 +1,4 @@
-# 7. Defining General OOP Development Rules
+# 4. Defining General OOP Development Rules
 
 Establish consistent rules for developing classes in the Component layer:
 1. Use a single constructor.
