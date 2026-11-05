@@ -1,7 +1,7 @@
 export const site = {
   name: 'Shukri Dozom',
   jobTitle: 'Embedded Software Engineer | Tech Lead @ Micropolis Robotics',
-  about: `Embedded Software Engineer with 5+ years of experience developing firmware and embedded systems for robotics and IoT applications, with a strong focus on STM32-based systems, C/C++, CAN, and RTOS.
+  about: `Embedded Software Engineer with 6+ years of experience developing firmware and embedded systems for robotics and IoT applications, with a strong focus on STM32-based systems, C/C++, CAN, and RTOS.
 
 My work focuses on building **modular, maintainable, and reusable firmware architectures** that separate application logic from hardware-specific implementation. I design layered embedded software using C/C++ and OOP principles, while keeping performance, resource constraints, and real-time requirements in mind.
 
