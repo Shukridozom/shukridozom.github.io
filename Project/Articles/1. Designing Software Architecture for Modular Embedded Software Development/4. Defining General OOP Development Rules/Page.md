@@ -1,10 +1,15 @@
 # 4. Defining General OOP Development Rules
 
-In the previous article, we decided to go with the OOP approach to design and develop the units of the Component layer.
+In the previous article, we decided to use C++ and OOP principles to design and develop the units of the Component layer.
 
-However, in the embedded development domain, we can’t just apply any software principles blindly, as we’re dealing with limited resources and interacting with hardware peripherals. Therefore, we should always keep an eye on performance and monitor where objects and variables are allocated.
+However, in the embedded development domain, we can’t just apply any software principles blindly, as we’re dealing with limited resources and interacting with hardware peripherals, we should always keep an eye on performance and monitor where objects and variables are allocated.
 
-For this reason, we will establish some consistent rules for developing classes in the Component layer:
+We need to consider the constraints of embedded systems when designing our classes. For example:
+
+- Hardware initialization: If an object's constructor contains initialization logic that accesses hardware, we must ensure that the corresponding hardware peripherals have already been initialized before creating the object.
+- Memory allocation: If we want to implement polymorphic behavior, we must ensure that it doesn't introduce dynamic memory allocation under the hood, keeping memory usage predictable.
+
+For these reasons, we will establish some consistent rules for developing classes in the Component layer:
 
 1. **Use a single constructor.**
     
@@ -20,7 +25,7 @@ For this reason, we will establish some consistent rules for developing classes 
     
 4. **Avoid dynamic memory when creating polymorphic collections.**
     
-    If we want to implement polymorphic behavior, we need to make sure that we are not using heap allocation under the hood. This is particularly important in embedded systems, where memory resources are limited and dynamic allocation can introduce runtime overhead and less predictable memory usage. **Furthermore, avoiding the heap ensures we do not violate MISRA C/C++ guidelines regarding dynamic memory management.**
+    If we want to implement polymorphic behavior, we need to make sure that we are not using heap allocation under the hood. This is particularly important in embedded systems, where memory resources are limited and dynamic allocation can introduce runtime overhead and less predictable memory usage.
     
 
 We will discuss each rule and the reasoning behind it separately in the following articles.
