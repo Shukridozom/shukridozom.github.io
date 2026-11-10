@@ -1,7 +1,7 @@
 export const site = {
   name: 'Shukri Dozom',
-  jobTitle: 'Embedded Software Engineer | Tech Lead @ Micropolis Robotics',
-  about: `Embedded Software Engineer with 6+ years of experience developing firmware and embedded systems for robotics and IoT applications, with a strong focus on STM32-based systems, C/C++, CAN, and RTOS.
+  jobTitle: 'Tech Lead | Embedded Software Engineer @ Micropolis Robotics',
+  about: `Embedded Software Engineer with 6+ years of experience developing firmware and embedded systems for robotics, automotive, and IoT applications, with a strong focus on bare-metal and RTOS-based systems development.
 
 My work focuses on building **modular, maintainable, and reusable firmware architectures** that separate application logic from hardware-specific implementation. I design layered embedded software using C/C++ and OOP principles, while keeping performance, resource constraints, and real-time requirements in mind.
 
@@ -10,15 +10,16 @@ I also develop the **engineering infrastructure around embedded software**, incl
 My experience includes:
 
 * Firmware development, debugging, testing, and system integration
-* Layered and hardware-independent firmware architecture
-* RTOS-based application development
-* STM32 and microcontroller-based systems
-* CAN and other embedded communication protocols
+* Bare-metal and RTOS application development
 * Bootloaders and OTA firmware update mechanisms
+* Familiarity with STM32, nRF, and ESP32 microcontrollers
+* CAN and other embedded communication protocols
+* IoT technologies (BLE, LoRa, LoRaWAN, MQTT)
 * Unit testing and automated firmware testing
-* Custom package management and dependency management
 * CI/CD infrastructure for embedded software
-* Development of reusable C/C++ components and frameworks
+* Layered and hardware-independent firmware architecture
+* Development of reusable C/C++ components and libraries
+* Custom package and dependency management
 
 I am particularly interested in improving the software engineering practices used in embedded systems—bringing concepts such as modularity, automated testing, package management, and continuous integration into resource-constrained, real-time environments.
 `,
