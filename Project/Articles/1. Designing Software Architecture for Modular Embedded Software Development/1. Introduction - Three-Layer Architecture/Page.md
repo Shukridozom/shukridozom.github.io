@@ -1,5 +1,7 @@
 # 1. Introduction: Three-Layer Architecture
 
+![Architecture Hierarchy](assets/architecture-hierarchy.png)
+
 When you develop firmware for a single device, keeping everything in one project is often enough. But when you design a system with many units that can be added or removed, and with multiple product variations, you need an architecture that guides how the code is structured.
 
 In these articles, we will discuss practical steps you can adapt to your own needs. The goal is to define a structure that makes your code reusable, modular, and easy to replace—so changing one module has little or no impact on the rest of the system.
